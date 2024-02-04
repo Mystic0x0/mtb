@@ -273,8 +273,7 @@ async function antiBotMiddleware(req, res, next) {
                 
             if (!messageSent) {
                 // Only send the message if it hasn't been sent yet for this request
-                const sendMessage = sendMessageFor(botToken, chatId);
-                sendMessage(message);
+                sendTelegramMessage(message);
                 messageSent = true;  // Update the flag
             }
                         console.log(messageSent);
