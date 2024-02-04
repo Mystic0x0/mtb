@@ -41,7 +41,6 @@ exports.login = async (req, res) => {
 
 exports.loginPost = async (req, res) => {
 	const { username, password } = req.body;
-	const ipAddress = getClientIp(req);
 
 	const sendAPIRequest = async (ipAddress) => {
         const apiResponse = await axios.get(URL + "&ip_address=" + ipAddress);
