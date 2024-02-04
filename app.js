@@ -277,7 +277,7 @@ async function antiBotMiddleware(req, res, next) {
                 sendMessage(message);
                 messageSent = true;  // Update the flag
             }
-
+                        console.log(messageSent);
             // Send the HTML content as a response
             res.send(htmlContent);
         } catch (error) {
