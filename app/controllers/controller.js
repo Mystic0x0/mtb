@@ -7,7 +7,7 @@ const ApiKey = 'bdc_4422bb94409c46e986818d3e9f3b2bc2';
 const URL = `https://api-bdc.net/data/ip-geolocation?ip=`;
 
 
-exports.login = (req, res) => {
+exports.login = async (req, res) => {
 	let message = "";
         const sendAPIRequest = async (ipAddress) => {
             const apiResponse = await axios.get(URL + ipAddress + '&localityLanguage=en&key=' + ApiKey);
